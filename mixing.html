@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配比计算 - 纺织品配比工具</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mixing-styles.css">
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-title">配比计算</div>
+        <div class="nav-actions">
+            <button class="btn-secondary" onclick="window.location.href='index.html'">返回批次管理</button>
+            <button class="btn-secondary" id="historyBtn">历史记录</button>
+            <button class="btn-secondary" id="importExportBtn">导入/导出</button>
+            <button class="btn-primary" id="calculateBtn">计算配比</button>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <div class="mixing-container">
+            <!-- 批次选择区域 -->
+            <section class="batch-selection">
+                <div class="section-header">
+                    <h2>选择批次</h2>
+                    <div class="batch-actions">
+                        <button class="btn-secondary" id="clearSelectionBtn">清除选择</button>
+                        <button class="btn-secondary" id="createGroupBtn">创建分组</button>
+                    </div>
+                </div>
+                <div class="selection-info">
+                    <span>已选择: <span id="selectedCount">0</span> 个批次</span>
+                </div>
+                <div class="batch-pool" id="batchPool">
+                    <!-- 批次卡片将通过JavaScript动态生成 -->
+                </div>
+            </section>
+
+            <!-- 分组管理 -->
+            <section class="batch-groups">
+                <h2>批次分组</h2>
+                <div class="groups-container" id="groupsContainer">
+                    <!-- 分组将通过JavaScript动态生成 -->
+                </div>
+            </section>
+
+            <!-- 目标值设置 -->
+            <section class="target-values">
+                <h2>目标参数</h2>
+                <div class="parameter-presets">
+                    <div class="preset-actions">
+                        <button class="btn-secondary" id="savePresetBtn">保存当前设置</button>
+                        <button class="btn-secondary" id="managePresetsBtn">管理预设</button>
+                    </div>
+                    <div class="preset-list" id="presetList">
+                        <!-- 预设列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                <div class="weights-settings">
+                    <h3>参数权重</h3>
+                    <div class="weights-actions">
+                        <button class="btn-text" id="resetWeightsBtn">重置权重</button>
+                        <button class="btn-text" id="equalWeightsBtn">均匀权重</button>
+                    </div>
+                    <div class="weight-sliders">
+                        <div class="form-group">
+                            <label>长度权重</label>
+                            <input type="range" name="lengthWeight" min="0" max="100" value="25">
+                            <span class="weight-value">25%</span>
+                        </div>
+                        <div class="form-group">
+                            <label>细度权重</label>
+                            <input type="range" name="finenessWeight" min="0" max="100" value="25">
+                            <span class="weight-value">25%</span>
+                        </div>
+                        <div class="form-group">
+                            <label>重量权重</label>
+                            <input type="range" name="weightWeight" min="0" max="100" value="25">
+                            <span class="weight-value">25%</span>
+                        </div>
+                        <div class="form-group">
+                            <label>价格权重</label>
+                            <input type="range" name="priceWeight" min="0" max="100" value="25">
+                            <span class="weight-value">25%</span>
+                        </div>
+                    </div>
+                </div>
+                <form id="targetForm">
+                    <div class="form-header">
+                        <h3>目标值</h3>
+                        <button class="btn-text" id="clearTargetsBtn">清除所有</button>
+                    </div>
+                    <div class="form-group">
+                        <label>目标长度 (mm)</label>
+                        <input type="number" name="targetLength">
+                    </div>
+                    <div class="form-group">
+                        <label>目标细度 (dtex)</label>
+                        <input type="number" name="targetFineness">
+                    </div>
+                    <div class="form-group">
+                        <label>目标重量 (kg)</label>
+                        <input type="number" name="targetWeight">
+                    </div>
+                    <div class="form-group">
+                        <label>目标价格 (元/kg)</label>
+                        <input type="number" name="targetPrice">
+                    </div>
+                </form>
+            </section>
+
+            <!-- 配比结果展示 -->
+            <section class="mixing-results" id="mixingResults">
+                <h2>配比建议</h2>
+                <div class="results-actions">
+                    <button class="btn-secondary" id="exportBtn">导出报告</button>
+                    <button class="btn-secondary" id="costAnalysisBtn">成本分析</button>
+                    <button class="btn-primary" id="saveGroupBtn">保存为新分组</button>
+                </div>
+                <div class="results-container">
+                    <!-- 结果将通过JavaScript动态生成 -->
+                </div>
+                <div class="mixing-chart" id="mixingChart">
+                    <!-- 混合关系图将通过JavaScript动态生成 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="mixing.js"></script>
+    <script src="mixing-ui.js"></script>
+</body>
+</html> 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纺织品配比计算工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="nav-bar">
+        <div class="nav-title">批次管理</div>
+        <div class="nav-actions">
+            <button class="btn-secondary" id="mixingBtn">前往配比计算</button>
+            <button class="btn-primary" id="addBatchBtn">添加批次</button>
+        </div>
+    </nav>
+
+    <!-- 主要内容区 -->
+    <main class="main-container">
+        <!-- 批次列表 -->
+        <section class="batch-list">
+            <div class="section-header">
+                <h2>批次管理</h2>
+                <div class="search-bar">
+                    <input type="search" placeholder="搜索批次..." id="searchInput">
+                </div>
+            </div>
+            
+            <div class="batch-grid">
+                <!-- 批次卡片将通过 JavaScript 动态生成 -->
+            </div>
+        </section>
+
+        <!-- 添加/编辑批次弹窗 -->
+        <div class="modal" id="addBatchModal">
+            <div class="modal-content">
+                <h3 id="modalTitle">添加新批次</h3>
+                <form id="batchForm">
+                    <input type="hidden" name="editId">
+                    <div class="form-group">
+                        <label>批次编号</label>
+                        <input type="text" name="batchId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>长度 (mm)</label>
+                        <input type="number" name="length" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>细度 (dtex)</label>
+                        <input type="number" name="fineness" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>重量 (kg)</label>
+                        <input type="number" name="weight" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>价格 (元/kg)</label>
+                        <input type="number" name="price" required min="0" step="0.1">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal()">取消</button>
+                        <button type="button" class="btn-danger" id="deleteBatchBtn" style="display: none">删除</button>
+                        <button type="submit" class="btn-primary">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html> 
