@@ -358,7 +358,7 @@ class MixingUI {
                             ${group.result ? `
                                 <span class="group-ratio">${this.formatRatios(group.ratios)}</span>
                             ` : ''}
-                            <button class="btn-danger" onclick="event.stopPropagation(); this.deleteGroup('${group.id}')">
+                            <button class="btn-danger delete-group-btn" data-group-id="${group.id}">
                                 删除
                             </button>
                         </div>
@@ -386,6 +386,15 @@ class MixingUI {
                 }
             });
         });
+
+        // 添加分组删除事件
+        document.querySelectorAll('.delete-group-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();  // 防止触发分组选择
+                const groupId = btn.dataset.groupId;
+                this.deleteGroup(groupId);
+            });
+        });
     }
 
     // 保存分组到本地存储
@@ -396,9 +405,16 @@ class MixingUI {
     // 删除分组
     deleteGroup(groupId) {
         if (confirm('确定要删除这个分组吗？')) {
+            // 如果分组已被选中，从选中列表中移除
+            const selectedIndex = this.selectedGroups.findIndex(g => g.id === groupId);
+            if (selectedIndex !== -1) {
+                this.selectedGroups.splice(selectedIndex, 1);
+            }
+            
             this.groups = this.groups.filter(g => g.id !== groupId);
             this.saveGroups();
             this.renderGroups();
+            this.updateSelectedCount();  // 更新选中数量显示
         }
     }
 
