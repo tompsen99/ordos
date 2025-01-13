@@ -89,14 +89,23 @@
                 <form id="targetForm">
                     <div class="form-header">
                         <h3>目标值</h3>
-                        <button class="btn-text" id="clearTargetsBtn">清除所有</button>
+                        <div class="target-actions">
+                            <div class="grade-buttons">
+                                <button type="button" class="btn-text" id="gradeGBtn">G系列</button>
+                                <button type="button" class="btn-text" id="gradeJBtn">J系列</button>
+                                <button type="button" class="btn-text" id="gradeABtn">A系列</button>
+                                <button type="button" class="btn-text" id="gradeBBtn">B系列</button>
+                                <button type="button" class="btn-text" id="gradeCBtn">C系列</button>
+                            </div>
+                            <button class="btn-text" id="clearTargetsBtn">清除所有</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>目标长度 (mm)</label>
                         <input type="number" name="targetLength">
                     </div>
                     <div class="form-group">
-                        <label>目标细度 (dtex)</label>
+                        <label>目标细度 (μm)</label>
                         <input type="number" name="targetFineness">
                     </div>
                     <div class="form-group">
