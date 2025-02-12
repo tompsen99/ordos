@@ -18,6 +18,7 @@ class MixingUI {
     initializeUI() {
         this.renderBatchPool();
         this.renderGroups();
+        this.bindGroupEvents();
         this.updateSelectedCount();
         this.initializeWeightSliders();
         this.renderPresetList();
@@ -49,6 +50,11 @@ class MixingUI {
             this.saveAsGroup();
         });
 
+        // 成本分析按钮
+        document.getElementById('costAnalysisBtn').addEventListener('click', () => {
+            this.analyzeCost();
+        });
+
         // 权重滑块事件
         document.querySelectorAll('.weight-sliders input[type="range"]').forEach(slider => {
             slider.addEventListener('input', (e) => {
@@ -56,20 +62,7 @@ class MixingUI {
             });
         });
 
-        // 成本分析按钮
-        document.getElementById('costAnalysisBtn').addEventListener('click', () => {
-            this.analyzeCost();
-        });
-
-        // 参数预设相关事件
-        document.getElementById('savePresetBtn').addEventListener('click', () => {
-            this.saveCurrentAsPreset();
-        });
-        
-        document.getElementById('managePresetsBtn').addEventListener('click', () => {
-            this.showPresetManager();
-        });
-        
+        // 权重重置和均匀按钮
         document.getElementById('resetWeightsBtn').addEventListener('click', () => {
             this.resetWeights();
         });
@@ -77,7 +70,8 @@ class MixingUI {
         document.getElementById('equalWeightsBtn').addEventListener('click', () => {
             this.setEqualWeights();
         });
-        
+
+        // 目标值清除按钮
         document.getElementById('clearTargetsBtn').addEventListener('click', (e) => {
             e.preventDefault();
             this.clearTargetValues();
@@ -91,6 +85,71 @@ class MixingUI {
         // 导入导出按钮
         document.getElementById('importExportBtn').addEventListener('click', () => {
             this.showImportExportDialog();
+        });
+
+        // 等级目标按钮
+        document.getElementById('gradeGBtn').addEventListener('click', () => {
+            this.showGradeTargets('G');
+        });
+        document.getElementById('gradeJBtn').addEventListener('click', () => {
+            this.showGradeTargets('J');
+        });
+        document.getElementById('gradeABtn').addEventListener('click', () => {
+            this.showGradeTargets('A');
+        });
+        document.getElementById('gradeBBtn').addEventListener('click', () => {
+            this.showGradeTargets('B');
+        });
+        document.getElementById('gradeCBtn').addEventListener('click', () => {
+            this.showGradeTargets('C');
+        });
+    }
+
+    // 添加分组事件绑定方法
+    bindGroupEvents() {
+        const container = document.getElementById('groupsContainer');
+        if (!container) return;
+
+        // 移除所有现有的事件监听器
+        const clone = container.cloneNode(true);
+        container.parentNode.replaceChild(clone, container);
+        const newContainer = document.getElementById('groupsContainer');
+
+        // 分组选择事件
+        newContainer.querySelectorAll('.group-card').forEach(card => {
+            const groupId = card.dataset.groupId;
+            if (!groupId) return;
+            
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.btn-danger') && !e.target.closest('.group-actions')) {
+                    this.toggleGroupSelection(card, groupId);
+                }
+            });
+        });
+
+        // 分组删除事件
+        newContainer.querySelectorAll('.delete-group-btn').forEach(btn => {
+            const groupId = btn.dataset.groupId;
+            if (!groupId) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteGroup(groupId);
+            });
+        });
+
+        // 分组比例显示事件（如果有的话）
+        newContainer.querySelectorAll('.group-ratio').forEach(ratio => {
+            ratio.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+
+        // 分组结果显示事件（如果有的话）
+        newContainer.querySelectorAll('.group-result').forEach(result => {
+            result.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
         });
     }
 
@@ -111,19 +170,107 @@ class MixingUI {
     // 创建可选择的批次卡片
     createSelectableBatchCard(batch) {
         const isSelected = this.selectedBatches.some(b => b.id === batch.id);
+        const grade = this.calculateGrade(batch.length, batch.fineness);
         return `
             <div class="batch-card selectable ${isSelected ? 'selected' : ''}" data-batch-id="${batch.id}">
                 <div class="batch-header">
                     <h3>批次 ${batch.id}</h3>
+                    <span class="batch-grade">${grade}</span>
                 </div>
                 <div class="batch-details">
                     <p>长度: ${batch.length} mm</p>
-                    <p>细度: ${batch.fineness} dtex</p>
+                    <p>细度: ${batch.fineness} μm</p>
                     <p>重量: ${batch.weight} kg</p>
                     <p>价格: ${batch.price} 元/kg</p>
                 </div>
             </div>
         `;
+    }
+
+    // 计算等级
+    calculateGrade(length, fineness) {
+        // G系列
+        if (fineness <= 15) {
+            if (length >= 34.5) return 'G1';
+            if (length >= 32 && length < 34.5) return 'G2';
+            if (length >= 28 && length < 30) return 'G3';
+            if (length >= 28 && length < 30) return 'G4';
+            if (length >= 26 && length < 28) return 'G5';
+            if (length >= 26 && length < 28) return 'G6';
+        }
+
+        // J系列
+        if (length >= 34.5) {
+            if (fineness > 15.0 && fineness <= 15.2) return 'J0';
+            if (fineness > 15.2 && fineness < 15.6) return 'J1';
+            if (fineness >= 15.6 && fineness <= 16.0) return 'J2';
+            if (fineness > 16.0 && fineness <= 16.2) return 'J4';
+            if (fineness > 16.2 && fineness < 16.5) return 'J5';
+        }
+        if (length >= 33.5 && length < 34.5 && fineness >= 16.3 && fineness <= 16.6) return 'J3';
+
+        // A系列
+        if (length >= 34.0 && length < 34.5 && fineness > 15.2 && fineness < 15.6) return 'A00';
+        if (length >= 32 && length < 34 && fineness > 15.2 && fineness < 15.6) return 'A01';
+        if (length >= 32 && length < 33.5 && fineness >= 15.6 && fineness <= 15.8) return 'A02';
+        if (length > 31.5 && length < 33 && fineness > 15.8 && fineness <= 16.0) return 'A03';
+        if (length > 31.5 && length < 33 && fineness > 16.0 && fineness <= 16.3) return 'A04';
+        if (length > 31.5 && length < 33.5 && fineness > 16.3 && fineness <= 16.5) return 'A05';
+        if (length >= 30 && length <= 31.5 && fineness > 16.5 && fineness <= 16.8) return 'A06';
+        if (length >= 30 && length < 33 && fineness > 16.8 && fineness <= 17.6) return 'A07';
+
+        // B系列
+        if (length >= 30 && length < 31.5 && fineness > 15.8 && fineness <= 16.0) return 'B1';
+        if (length >= 28 && length < 30 && fineness > 15.8 && fineness <= 16.0) return 'B2';
+        if (length >= 26 && length < 30 && fineness > 16.0 && fineness < 16.5) return 'B3';
+        if (length >= 26 && length < 28 && fineness > 15.8 && fineness <= 16.0) return 'B4';
+        if (length >= 26 && length < 28 && fineness > 16.0 && fineness < 16.5) return 'B5';
+        if (length >= 30 && fineness > 16.6 && fineness <= 17.2) return 'B6';
+        if (length >= 28 && length < 30 && fineness >= 16.5 && fineness <= 16.8) return 'B7';
+
+        // C系列
+        if (length >= 34.5 && fineness >= 16.5 && fineness <= 16.6) return 'C1';
+        if (length >= 30 && fineness > 17.2) return 'C2';
+        if (length >= 34 && length < 34.5 && fineness > 15.0 && fineness <= 15.2) return 'C3';
+        if (length >= 34 && length < 34.5 && fineness >= 15.6 && fineness < 15.8) return 'C4';
+        if (length >= 34 && length < 34.5 && fineness >= 15.8 && fineness < 16.3) return 'C5';
+        if (length >= 33.5 && length < 34 && fineness >= 15.6 && fineness < 15.8) return 'C6';
+        if (length >= 33.5 && length < 34 && fineness >= 15.8 && fineness < 16.0) return 'C7';
+        if (length > 33.0 && length < 34 && fineness >= 16.0 && fineness < 16.3) return 'C8';
+        if (length > 33 && length < 33.5 && fineness > 15.8 && fineness < 16.0) return 'C9';
+        if (length >= 33 && length < 33.5 && fineness > 16.5 && fineness <= 16.6) return 'C10';
+        if (length >= 30 && length < 32 && fineness <= 15.2) return 'C11';
+        if (length >= 32 && length < 34 && fineness > 15.0 && fineness <= 15.2) return 'C12';
+        if (length > 31.5 && length < 33 && fineness > 16.5) return 'C13';
+        if (length >= 30 && length < 32 && fineness > 15.2 && fineness <= 15.5) return 'C14';
+        if (length >= 30 && length < 32 && fineness > 15.5 && fineness <= 15.8) return 'C15';
+        if (length >= 30 && length <= 31.5 && fineness > 16.0 && fineness <= 16.5) return 'C16';
+        if (length >= 30 && length < 33 && fineness > 17.6) return 'C17';
+        if (length >= 28 && length < 30 && fineness > 16.8) return 'C18';
+        if (length >= 26 && length < 30 && fineness > 15.0 && fineness <= 15.2) return 'C19';
+        if (length >= 26 && length < 30 && fineness > 15.2 && fineness <= 15.8) return 'C20';
+        if (length >= 26 && length < 28 && fineness >= 16.5) return 'C21';
+        if (length >= 24 && length < 26 && fineness <= 14) return 'C22';
+        if (length >= 24 && length < 26 && fineness > 14 && fineness <= 14.5) return 'C23';
+        if (length >= 24 && length < 26 && fineness > 14.5 && fineness <= 15) return 'C24';
+        if (length >= 24 && length < 26 && fineness > 15.0 && fineness <= 15.2) return 'C25';
+        if (length >= 24 && length < 26 && fineness > 15.2 && fineness <= 16) return 'C26';
+        if (length >= 24 && length < 26 && fineness > 16.0) return 'C27';
+        if (length >= 20 && length < 24) return 'C28';
+        if (length < 20) return 'C29';
+        if (length >= 30 && fineness <= 16.5) return 'C31';
+        if (length >= 30 && fineness > 16.5) return 'C32';
+        if (length < 30 && fineness <= 16.5) return 'C33';
+        if (length < 30 && fineness > 16.5) return 'C34';
+        if (length < 30) return 'C35';
+        if (length >= 30 && length < 32) return 'C36';
+        if (length >= 32) return 'C37';
+        if (fineness <= 17) return 'C38';
+        if (fineness > 17) return 'C39';
+        if (length < 30) return 'C40';
+        if (length >= 30) return 'C41';
+
+        return '未分级';
     }
 
     // 切换批次选择状态
@@ -167,8 +314,14 @@ class MixingUI {
     // 初始化权重滑块
     initializeWeightSliders() {
         document.querySelectorAll('.weight-sliders input[type="range"]').forEach(slider => {
+            // 设置初始值
             const valueDisplay = slider.nextElementSibling;
             valueDisplay.textContent = `${slider.value}%`;
+            
+            // 绑定滑动事件
+            slider.addEventListener('input', (e) => {
+                this.updateWeights(e.target);
+            });
         });
     }
 
@@ -176,29 +329,56 @@ class MixingUI {
     updateWeights(changedSlider) {
         const sliders = document.querySelectorAll('.weight-sliders input[type="range"]');
         const total = Array.from(sliders).reduce((sum, slider) => sum + Number(slider.value), 0);
-
+        
         // 更新显示值
         sliders.forEach(slider => {
             const valueDisplay = slider.nextElementSibling;
             const normalizedValue = (slider.value / total * 100).toFixed(0);
-            slider.value = normalizedValue;
             valueDisplay.textContent = `${normalizedValue}%`;
         });
+        
+        // 更新计算器的权重
+        this.calculator.setWeights({
+            length: Number(sliders[0].value) / total,
+            fineness: Number(sliders[1].value) / total,
+            weight: Number(sliders[2].value) / total,
+            price: Number(sliders[3].value) / total
+        });
 
-        // 更新计算器权重
-        const weights = {
-            length: Number(document.querySelector('input[name="lengthWeight"]').value) / 100,
-            fineness: Number(document.querySelector('input[name="finenessWeight"]').value) / 100,
-            weight: Number(document.querySelector('input[name="weightWeight"]').value) / 100,
-            price: Number(document.querySelector('input[name="priceWeight"]').value) / 100
-        };
-        
-        this.calculator.setWeights(weights);
-        
         // 如果有当前结果，重新计算
         if (this.currentResult) {
             this.calculateMixing();
         }
+    }
+
+    // 重置权重
+    resetWeights() {
+        const defaultWeights = {
+            length: 25,
+            fineness: 25,
+            weight: 25,
+            price: 25
+        };
+        
+        // 更新滑块值
+        document.querySelectorAll('.weight-sliders input[type="range"]').forEach(slider => {
+            slider.value = 25;
+            const valueDisplay = slider.nextElementSibling;
+            valueDisplay.textContent = '25%';
+        });
+        
+        // 更新计算器权重
+        this.calculator.setWeights({
+            length: 0.25,
+            fineness: 0.25,
+            weight: 0.25,
+            price: 0.25
+        });
+    }
+
+    // 设置均匀权重
+    setEqualWeights() {
+        this.resetWeights();
     }
 
     // 获取目标值
@@ -298,7 +478,7 @@ class MixingUI {
 
     // 格式化混合结果显示
     formatMixResult(result) {
-        return `长度 ${result.length.toFixed(1)}mm, 细度 ${result.fineness.toFixed(1)}dtex`;
+        return `长度 ${result.length.toFixed(1)}mm, 细度 ${result.fineness.toFixed(1)}μm`;
     }
 
     // 创建新分组
@@ -312,7 +492,7 @@ class MixingUI {
         if (!groupName) return;
 
         const group = {
-            id: Date.now().toString(),
+            id: Date.now(),
             name: groupName,
             batches: this.selectedBatches.map(b => b.id)
         };
@@ -320,6 +500,7 @@ class MixingUI {
         this.groups.push(group);
         this.saveGroups();
         this.renderGroups();
+        this.bindGroupEvents();
     }
 
     // 保存当前配比为新分组
@@ -329,36 +510,51 @@ class MixingUI {
             return;
         }
 
-        const groupName = prompt('请输入配比方案名称：');
-        if (!groupName) return;
+        const name = prompt('请输入分组名称：');
+        if (!name) return;
+
+        // 计算混合后的等级
+        const finalGrade = this.calculateGrade(
+            this.currentResult.result.length,
+            this.currentResult.result.fineness
+        );
 
         const group = {
-            id: Date.now().toString(),
-            name: groupName,
+            id: Date.now(),
+            name: name,
             batches: this.selectedBatches.map(b => b.id),
             ratios: this.currentResult.ratios,
-            result: this.currentResult.result
+            result: this.currentResult.result,
+            grade: finalGrade,
+            timestamp: Date.now()
         };
 
         this.groups.push(group);
         this.saveGroups();
         this.renderGroups();
+        this.bindGroupEvents();
+        this.showToast('分组保存成功');
     }
 
     // 渲染分组列表
     renderGroups() {
         const container = document.getElementById('groupsContainer');
+        if (!container) return;
+        
         container.innerHTML = this.groups.map(group => {
+            if (!group || !group.id) return '';
+            
             const isSelected = this.selectedGroups.some(g => g.id === group.id);
             return `
                 <div class="group-card ${isSelected ? 'selected' : ''}" data-group-id="${group.id}">
                     <div class="group-header">
                         <h3>${group.name}</h3>
+                        <span class="batch-grade">${group.grade || '未分级'}</span>
                         <div class="group-actions">
                             ${group.result ? `
                                 <span class="group-ratio">${this.formatRatios(group.ratios)}</span>
                             ` : ''}
-                            <button class="btn-danger" onclick="event.stopPropagation(); this.deleteGroup('${group.id}')">
+                            <button class="btn-danger delete-group-btn" data-group-id="${group.id}">
                                 删除
                             </button>
                         </div>
@@ -377,15 +573,8 @@ class MixingUI {
             `;
         }).join('');
 
-        // 添加分组选择事件
-        document.querySelectorAll('.group-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!e.target.closest('.btn-danger')) {
-                    const groupId = card.dataset.groupId;
-                    this.toggleGroupSelection(card, groupId);
-                }
-            });
-        });
+        // 渲染后立即绑定事件
+        this.bindGroupEvents();
     }
 
     // 保存分组到本地存储
@@ -396,16 +585,37 @@ class MixingUI {
     // 删除分组
     deleteGroup(groupId) {
         if (confirm('确定要删除这个分组吗？')) {
-            this.groups = this.groups.filter(g => g.id !== groupId);
+            // 确保 groupId 是数字类型
+            const numericGroupId = parseInt(groupId);
+            // 如果分组已被选中，从选中列表中移除
+            const selectedIndex = this.selectedGroups.findIndex(g => g.id === numericGroupId);
+            if (selectedIndex !== -1) {
+                this.selectedGroups.splice(selectedIndex, 1);
+            }
+            
+            this.groups = this.groups.filter(g => g.id !== numericGroupId);
             this.saveGroups();
             this.renderGroups();
+            this.bindGroupEvents();
+            this.updateSelectedCount();
         }
     }
 
     // 切换分组选择状态
     toggleGroupSelection(card, groupId) {
-        const group = this.groups.find(g => g.id === groupId);
-        const index = this.selectedGroups.findIndex(g => g.id === groupId);
+        if (!groupId) return;
+        
+        // 确保 groupId 是数字类型
+        const numericGroupId = parseInt(groupId);
+        if (isNaN(numericGroupId)) return;
+        
+        const group = this.groups.find(g => g.id === numericGroupId);
+        if (!group) {
+            console.error(`找不到ID为 ${numericGroupId} 的分组`);
+            return;
+        }
+        
+        const index = this.selectedGroups.findIndex(g => g.id === numericGroupId);
 
         if (index === -1) {
             this.selectedGroups.push(group);
@@ -816,6 +1026,10 @@ ${result.batches.map((batch, i) => `
                         <h3>导入数据</h3>
                         <input type="file" id="importFileInput" accept=".json" style="display: none;">
                         <button class="btn-secondary" id="importBtn">选择文件导入</button>
+                    </div>
+                    <div class="clear-section">
+                        <h4>数据清除</h4>
+                        <button class="btn-danger" id="clearDataBtn">清除所有数据</button>
                     </div>
                 </div>
                 <div class="modal-actions">
@@ -1341,13 +1555,21 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
             weight: 25,
             price: 25
         };
-        this.updateWeightSlidersFromPreset({
+        
+        // 更新滑块值
+        document.querySelectorAll('.weight-sliders input[type="range"]').forEach(slider => {
+            slider.value = 25;
+            const valueDisplay = slider.nextElementSibling;
+            valueDisplay.textContent = '25%';
+        });
+        
+        // 更新计算器权重
+        this.calculator.setWeights({
             length: 0.25,
             fineness: 0.25,
             weight: 0.25,
             price: 0.25
         });
-        this.calculator.setWeights(defaultWeights);
     }
 
     // 设置均匀权重
@@ -1455,10 +1677,205 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
             }
         });
         
+        // 清除数据按钮
+        document.getElementById('clearDataBtn').addEventListener('click', () => {
+            this.clearAllData();
+        });
+        
         // 关闭按钮
         document.getElementById('closeImportExportBtn').addEventListener('click', () => {
             this.closeModal();
         });
+    }
+
+    bindPresetEvents(container) {
+        // 预设应用事件
+        container.querySelectorAll('.preset-apply').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const presetId = parseInt(btn.dataset.presetId);
+                this.applyPreset(presetId);
+            });
+        });
+
+        // 预设删除事件
+        container.querySelectorAll('.preset-delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const presetId = parseInt(btn.dataset.presetId);
+                this.deletePreset(presetId);
+            });
+        });
+    }
+
+    // 清除所有数据
+    clearAllData() {
+        if (!confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+            return;
+        }
+
+        // 清除本地存储
+        localStorage.removeItem('batches');
+        localStorage.removeItem('batchGroups');
+        localStorage.removeItem('mixingHistory');
+        localStorage.removeItem('mixingFavorites');
+        localStorage.removeItem('parameterPresets');
+
+        // 重置内存中的数据
+        this.batches = [];
+        this.groups = [];
+        this.history = [];
+        this.favorites = [];
+        this.presets = [];
+        this.selectedBatches = [];
+        this.selectedGroups = [];
+        this.currentResult = null;
+
+        // 刷新UI
+        this.renderBatchPool();
+        this.renderGroups();
+        this.updateSelectedCount();
+        this.renderPresetList();
+
+        // 重置权重
+        this.resetWeights();
+
+        // 关闭模态框
+        this.closeModal();
+
+        // 显示提示
+        this.showToast('所有数据已清除');
+    }
+
+    // 显示等级目标选择
+    showGradeTargets(series) {
+        const gradeRanges = this.getGradeRanges(series);
+        const options = Object.entries(gradeRanges).map(([grade, range]) => {
+            return `<option value="${grade}">
+                ${grade}: 长度 ${range.length.join('-')}mm, 细度 ${range.fineness.join('-')}μm
+            </option>`;
+        }).join('');
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>${series}系列等级目标</h3>
+                <div class="grade-selector">
+                    <select id="gradeSelect" class="form-control">
+                        ${options}
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="cancelGradeBtn">取消</button>
+                    <button class="btn-primary" id="applyGradeBtn">应用</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // 绑定事件
+        document.getElementById('cancelGradeBtn').addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        document.getElementById('applyGradeBtn').addEventListener('click', () => {
+            const select = document.getElementById('gradeSelect');
+            const grade = select.value;
+            const range = gradeRanges[grade];
+            
+            // 设置目标值为范围的中间值
+            const form = document.getElementById('targetForm');
+            form.targetLength.value = ((range.length[0] + range.length[1]) / 2).toFixed(1);
+            form.targetFineness.value = ((range.fineness[0] + range.fineness[1]) / 2).toFixed(1);
+            
+            this.closeModal();
+            this.showToast(`已设置${grade}等级目标值`);
+        });
+    }
+
+    // 获取等级范围数据
+    getGradeRanges(series) {
+        const ranges = {
+            G: {
+                'G1': { length: [34.5, Infinity], fineness: [0, 15.0] },
+                'G2': { length: [32.0, 34.5], fineness: [0, 15.0] },
+                'G3': { length: [28.0, 30.0], fineness: [0, 15.0] },
+                'G4': { length: [28.0, 30.0], fineness: [0, 15.0] },
+                'G5': { length: [26.0, 28.0], fineness: [0, 15.0] },
+                'G6': { length: [26.0, 28.0], fineness: [0, 15.0] }
+            },
+            J: {
+                'J0': { length: [34.5, Infinity], fineness: [15.0, 15.2] },
+                'J1': { length: [34.5, Infinity], fineness: [15.2, 15.6] },
+                'J2': { length: [34.5, Infinity], fineness: [15.6, 16.0] },
+                'J3': { length: [33.5, 34.5], fineness: [16.3, 16.6] },
+                'J4': { length: [34.5, Infinity], fineness: [16.0, 16.2] },
+                'J5': { length: [34.5, Infinity], fineness: [16.2, 16.5] }
+            },
+            A: {
+                'A00': { length: [34.0, 34.5], fineness: [15.2, 15.6] },
+                'A01': { length: [32.0, 34.0], fineness: [15.2, 15.6] },
+                'A02': { length: [32.0, 33.5], fineness: [15.6, 15.8] },
+                'A03': { length: [31.5, 33.0], fineness: [15.8, 16.0] },
+                'A04': { length: [31.5, 33.0], fineness: [16.0, 16.3] },
+                'A05': { length: [31.5, 33.5], fineness: [16.3, 16.5] },
+                'A06': { length: [30.0, 31.5], fineness: [16.5, 16.8] },
+                'A07': { length: [30.0, 33.0], fineness: [16.8, 17.6] }
+            },
+            B: {
+                'B1': { length: [30.0, 31.5], fineness: [15.8, 16.0] },
+                'B2': { length: [28.0, 30.0], fineness: [15.8, 16.0] },
+                'B3': { length: [26.0, 30.0], fineness: [16.0, 16.5] },
+                'B4': { length: [26.0, 28.0], fineness: [15.8, 16.0] },
+                'B5': { length: [26.0, 28.0], fineness: [16.0, 16.5] },
+                'B6': { length: [30.0, Infinity], fineness: [16.6, 17.2] },
+                'B7': { length: [28.0, 30.0], fineness: [16.5, 16.8] }
+            },
+            C: {
+                'C1': { length: [34.5, Infinity], fineness: [16.5, 16.6] },
+                'C2': { length: [30.0, Infinity], fineness: [17.2, Infinity] },
+                'C3': { length: [34.0, 34.5], fineness: [15.0, 15.2] },
+                'C4': { length: [34.0, 34.5], fineness: [15.6, 15.8] },
+                'C5': { length: [34.0, 34.5], fineness: [15.8, 16.3] },
+                'C6': { length: [33.5, 34.0], fineness: [15.6, 15.8] },
+                'C7': { length: [33.5, 34.0], fineness: [15.8, 16.0] },
+                'C8': { length: [33.0, 34.0], fineness: [16.0, 16.3] },
+                'C9': { length: [33.0, 33.5], fineness: [15.8, 16.0] },
+                'C10': { length: [33.0, 33.5], fineness: [16.5, 16.6] },
+                'C11': { length: [30.0, 32.0], fineness: [0, 15.2] },
+                'C12': { length: [32.0, 34.0], fineness: [15.0, 15.2] },
+                'C13': { length: [31.5, 33.0], fineness: [16.5, Infinity] },
+                'C14': { length: [30.0, 32.0], fineness: [15.2, 15.5] },
+                'C15': { length: [30.0, 32.0], fineness: [15.5, 15.8] },
+                'C16': { length: [30.0, 31.5], fineness: [16.0, 16.5] },
+                'C17': { length: [30.0, 33.0], fineness: [17.6, Infinity] },
+                'C18': { length: [28.0, 30.0], fineness: [16.8, Infinity] },
+                'C19': { length: [26.0, 30.0], fineness: [15.0, 15.2] },
+                'C20': { length: [26.0, 30.0], fineness: [15.2, 15.8] },
+                'C21': { length: [26.0, 28.0], fineness: [16.5, Infinity] },
+                'C22': { length: [24.0, 26.0], fineness: [0, 14.0] },
+                'C23': { length: [24.0, 26.0], fineness: [14.0, 14.5] },
+                'C24': { length: [24.0, 26.0], fineness: [14.5, 15.0] },
+                'C25': { length: [24.0, 26.0], fineness: [15.0, 15.2] },
+                'C26': { length: [24.0, 26.0], fineness: [15.2, 16.0] },
+                'C27': { length: [24.0, 26.0], fineness: [16.0, Infinity] },
+                'C28': { length: [20.0, 24.0], fineness: [0, Infinity] },
+                'C29': { length: [0, 20.0], fineness: [0, Infinity] },
+                'C31': { length: [30.0, Infinity], fineness: [0, 16.5] },
+                'C32': { length: [30.0, Infinity], fineness: [16.5, Infinity] },
+                'C33': { length: [0, 30.0], fineness: [0, 16.5] },
+                'C34': { length: [0, 30.0], fineness: [16.5, Infinity] },
+                'C35': { length: [0, 30.0], fineness: [0, Infinity] },
+                'C36': { length: [30.0, 32.0], fineness: [0, Infinity] },
+                'C37': { length: [32.0, Infinity], fineness: [0, Infinity] },
+                'C38': { length: [0, Infinity], fineness: [0, 17.0] },
+                'C39': { length: [0, Infinity], fineness: [17.0, Infinity] },
+                'C40': { length: [0, 30.0], fineness: [0, Infinity] },
+                'C41': { length: [30.0, Infinity], fineness: [0, Infinity] }
+            }
+        };
+
+        return ranges[series] || {};
     }
 }
 
