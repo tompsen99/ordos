@@ -204,37 +204,33 @@ class MixingUI {
             if (fineness > 15.0 && fineness <= 15.2) return 'J0';
             if (fineness > 15.2 && fineness < 15.6) return 'J1';
             if (fineness >= 15.6 && fineness <= 16.0) return 'J2';
-        }
-        if (length >= 33.5 && length < 34.5) {
-            if (fineness >= 16.3 && fineness <= 16.6) return 'J3';
-        }
-        if (length >= 34.5) {
             if (fineness > 16.0 && fineness <= 16.2) return 'J4';
             if (fineness > 16.2 && fineness < 16.5) return 'J5';
         }
+        if (length >= 33.5 && length < 34.5 && fineness >= 16.3 && fineness <= 16.6) return 'J3';
 
         // A系列
-        if (length >= 34.0 && length < 34.5 && fineness > 15.2 && fineness < 15.6) return 'A01';
-        if (length >= 32 && length < 34 && fineness > 15.2 && fineness < 15.6) return 'A02';
-        if (length >= 32 && length < 33.5 && fineness >= 15.6 && fineness <= 15.8) return 'A03';
-        if (length > 31.5 && length <= 33 && fineness > 15.8 && fineness <= 16.0) return 'A04';
-        if (length > 31.5 && length <= 33 && fineness > 16.0 && fineness <= 16.3) return 'A05';
-        if (length > 31.5 && length < 33.5 && fineness > 16.3 && fineness <= 16.5) return 'A06';
-        if (length >= 30 && length <= 31.5 && fineness > 16.5 && fineness <= 16.8) return 'A07';
-        if (length >= 30 && length < 33 && fineness > 16.8 && fineness <= 17.6) return 'A08';
+        if (length >= 34.0 && length < 34.5 && fineness > 15.2 && fineness < 15.6) return 'A00';
+        if (length >= 32 && length < 34 && fineness > 15.2 && fineness < 15.6) return 'A01';
+        if (length >= 32 && length < 33.5 && fineness >= 15.6 && fineness <= 15.8) return 'A02';
+        if (length > 31.5 && length < 33 && fineness > 15.8 && fineness <= 16.0) return 'A03';
+        if (length > 31.5 && length < 33 && fineness > 16.0 && fineness <= 16.3) return 'A04';
+        if (length > 31.5 && length < 33.5 && fineness > 16.3 && fineness <= 16.5) return 'A05';
+        if (length >= 30 && length <= 31.5 && fineness > 16.5 && fineness <= 16.8) return 'A06';
+        if (length >= 30 && length < 33 && fineness > 16.8 && fineness <= 17.6) return 'A07';
 
         // B系列
-        if (length >= 30 && length <= 31.5 && fineness > 15.8 && fineness <= 16.0) return 'B1';
+        if (length >= 30 && length < 31.5 && fineness > 15.8 && fineness <= 16.0) return 'B1';
         if (length >= 28 && length < 30 && fineness > 15.8 && fineness <= 16.0) return 'B2';
-        if (length >= 28 && length < 30 && fineness > 16.0 && fineness < 16.5) return 'B3';
+        if (length >= 26 && length < 30 && fineness > 16.0 && fineness < 16.5) return 'B3';
         if (length >= 26 && length < 28 && fineness > 15.8 && fineness <= 16.0) return 'B4';
         if (length >= 26 && length < 28 && fineness > 16.0 && fineness < 16.5) return 'B5';
-        if (length >= 33 && fineness > 16.6 && fineness <= 17.2) return 'B6';
+        if (length >= 30 && fineness > 16.6 && fineness <= 17.2) return 'B6';
         if (length >= 28 && length < 30 && fineness >= 16.5 && fineness <= 16.8) return 'B7';
 
         // C系列
         if (length >= 34.5 && fineness >= 16.5 && fineness <= 16.6) return 'C1';
-        if (length >= 33 && fineness > 17.2) return 'C2';
+        if (length >= 30 && fineness > 17.2) return 'C2';
         if (length >= 34 && length < 34.5 && fineness > 15.0 && fineness <= 15.2) return 'C3';
         if (length >= 34 && length < 34.5 && fineness >= 15.6 && fineness < 15.8) return 'C4';
         if (length >= 34 && length < 34.5 && fineness >= 15.8 && fineness < 16.3) return 'C5';
@@ -267,7 +263,7 @@ class MixingUI {
         if (length < 30 && fineness <= 16.5) return 'C33';
         if (length < 30 && fineness > 16.5) return 'C34';
         if (length < 30) return 'C35';
-        if (length >= 30 && length < 32 && fineness > 17.5) return 'C36';
+        if (length >= 30 && length < 32) return 'C36';
         if (length >= 32) return 'C37';
         if (fineness <= 17) return 'C38';
         if (fineness > 17) return 'C39';
@@ -1817,27 +1813,27 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
                 'J5': { length: [34.5, Infinity], fineness: [16.2, 16.5] }
             },
             A: {
-                'A01': { length: [34.0, 34.5], fineness: [15.2, 15.6] },
-                'A02': { length: [32.0, 34.0], fineness: [15.2, 15.6] },
-                'A03': { length: [32.0, 33.5], fineness: [15.6, 15.8] },
-                'A04': { length: [31.5, 33.0], fineness: [15.8, 16.0] },
-                'A05': { length: [31.5, 33.0], fineness: [16.0, 16.3] },
-                'A06': { length: [31.5, 33.5], fineness: [16.3, 16.5] },
-                'A07': { length: [30.0, 31.5], fineness: [16.5, 16.8] },
-                'A08': { length: [30.0, 33.0], fineness: [16.8, 17.6] }
+                'A00': { length: [34.0, 34.5], fineness: [15.2, 15.6] },
+                'A01': { length: [32.0, 34.0], fineness: [15.2, 15.6] },
+                'A02': { length: [32.0, 33.5], fineness: [15.6, 15.8] },
+                'A03': { length: [31.5, 33.0], fineness: [15.8, 16.0] },
+                'A04': { length: [31.5, 33.0], fineness: [16.0, 16.3] },
+                'A05': { length: [31.5, 33.5], fineness: [16.3, 16.5] },
+                'A06': { length: [30.0, 31.5], fineness: [16.5, 16.8] },
+                'A07': { length: [30.0, 33.0], fineness: [16.8, 17.6] }
             },
             B: {
                 'B1': { length: [30.0, 31.5], fineness: [15.8, 16.0] },
                 'B2': { length: [28.0, 30.0], fineness: [15.8, 16.0] },
-                'B3': { length: [28.0, 30.0], fineness: [16.0, 16.5] },
+                'B3': { length: [26.0, 30.0], fineness: [16.0, 16.5] },
                 'B4': { length: [26.0, 28.0], fineness: [15.8, 16.0] },
                 'B5': { length: [26.0, 28.0], fineness: [16.0, 16.5] },
-                'B6': { length: [33.0, Infinity], fineness: [16.6, 17.2] },
+                'B6': { length: [30.0, Infinity], fineness: [16.6, 17.2] },
                 'B7': { length: [28.0, 30.0], fineness: [16.5, 16.8] }
             },
             C: {
                 'C1': { length: [34.5, Infinity], fineness: [16.5, 16.6] },
-                'C2': { length: [33.0, Infinity], fineness: [17.2, Infinity] },
+                'C2': { length: [30.0, Infinity], fineness: [17.2, Infinity] },
                 'C3': { length: [34.0, 34.5], fineness: [15.0, 15.2] },
                 'C4': { length: [34.0, 34.5], fineness: [15.6, 15.8] },
                 'C5': { length: [34.0, 34.5], fineness: [15.8, 16.3] },
@@ -1870,7 +1866,7 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
                 'C33': { length: [0, 30.0], fineness: [0, 16.5] },
                 'C34': { length: [0, 30.0], fineness: [16.5, Infinity] },
                 'C35': { length: [0, 30.0], fineness: [0, Infinity] },
-                'C36': { length: [30.0, 32.0], fineness: [17.5, Infinity] },
+                'C36': { length: [30.0, 32.0], fineness: [0, Infinity] },
                 'C37': { length: [32.0, Infinity], fineness: [0, Infinity] },
                 'C38': { length: [0, Infinity], fineness: [0, 17.0] },
                 'C39': { length: [0, Infinity], fineness: [17.0, Infinity] },
