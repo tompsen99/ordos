@@ -1749,8 +1749,19 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
     showGradeTargets(series) {
         const gradeRanges = this.getGradeRanges(series);
         const options = Object.entries(gradeRanges).map(([grade, range]) => {
-            return `<option value="${grade}">
-                ${grade}: 长度 ${range.length.join('-')}mm, 细度 ${range.fineness.join('-')}μm
+            const lengthRange = range.length[1] === Infinity ? 
+                `≥${range.length[0]}` : 
+                `${range.length[0]}-${range.length[1]}`;
+            const finenessRange = range.fineness[1] === Infinity ? 
+                `>${range.fineness[0]}` : 
+                `${range.fineness[0]}-${range.fineness[1]}`;
+            
+            return `<option value="${grade}" 
+                data-length-min="${range.length[0]}" 
+                data-length-max="${range.length[1]}"
+                data-fineness-min="${range.fineness[0]}" 
+                data-fineness-max="${range.fineness[1]}">
+                ${grade}: 长度 ${lengthRange}mm, 细度 ${finenessRange}μm
             </option>`;
         }).join('');
 
@@ -1780,16 +1791,31 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
 
         document.getElementById('applyGradeBtn').addEventListener('click', () => {
             const select = document.getElementById('gradeSelect');
-            const grade = select.value;
-            const range = gradeRanges[grade];
+            const selectedOption = select.options[select.selectedIndex];
             
-            // 设置目标值为范围的中间值
+            // 获取选中等级的范围值
+            const lengthMin = parseFloat(selectedOption.dataset.lengthMin);
+            const lengthMax = parseFloat(selectedOption.dataset.lengthMax);
+            const finenessMin = parseFloat(selectedOption.dataset.finenessMin);
+            const finenessMax = parseFloat(selectedOption.dataset.finenessMax);
+            
+            // 设置目标值
             const form = document.getElementById('targetForm');
-            form.targetLength.value = ((range.length[0] + range.length[1]) / 2).toFixed(1);
-            form.targetFineness.value = ((range.fineness[0] + range.fineness[1]) / 2).toFixed(1);
+            
+            // 如果最大值是无穷，则使用最小值，否则取中间值
+            const targetLength = lengthMax === Infinity ? 
+                lengthMin : 
+                ((lengthMin + lengthMax) / 2).toFixed(1);
+                
+            const targetFineness = finenessMax === Infinity ? 
+                finenessMin : 
+                ((finenessMin + finenessMax) / 2).toFixed(1);
+            
+            form.targetLength.value = targetLength;
+            form.targetFineness.value = targetFineness;
             
             this.closeModal();
-            this.showToast(`已设置${grade}等级目标值`);
+            this.showToast(`已设置${selectedOption.value}等级目标值`);
         });
     }
 
@@ -1861,6 +1887,7 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
                 'C27': { length: [24.0, 26.0], fineness: [16.0, Infinity] },
                 'C28': { length: [20.0, 24.0], fineness: [0, Infinity] },
                 'C29': { length: [0, 20.0], fineness: [0, Infinity] },
+                'C30': { length: [0, Infinity], fineness: [0, Infinity] },
                 'C31': { length: [30.0, Infinity], fineness: [0, 16.5] },
                 'C32': { length: [30.0, Infinity], fineness: [16.5, Infinity] },
                 'C33': { length: [0, 30.0], fineness: [0, 16.5] },
@@ -1871,7 +1898,9 @@ ${analysis.recommendations.map(rec => `- ${rec.message}`).join('\n')}
                 'C38': { length: [0, Infinity], fineness: [0, 17.0] },
                 'C39': { length: [0, Infinity], fineness: [17.0, Infinity] },
                 'C40': { length: [0, 30.0], fineness: [0, Infinity] },
-                'C41': { length: [30.0, Infinity], fineness: [0, Infinity] }
+                'C41': { length: [30.0, Infinity], fineness: [0, Infinity] },
+                'C42': { length: [0, Infinity], fineness: [0, Infinity] },
+                'C43': { length: [0, Infinity], fineness: [0, Infinity] }
             }
         };
 
